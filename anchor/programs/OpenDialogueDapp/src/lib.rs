@@ -6,76 +6,119 @@ declare_id!("coUnmi3oBUtwtd9fjeAvSsJssXh5A5xyPbhpewyzRVF");
 pub mod open_dialogue_dapp {
     use super::*;
 
-    // Create a channel
-    pub fn create_channel(ctx: Context<CreateChannel>, subject: Pubkey) -> Result<()> {
-      let channel = &mut ctx.accounts.channel;
-      channel.subject = subject;
-      channel.posts = Vec::new();
-      Ok(())
+    // Create a channel for a subject (can only be one channel per subject)
+    pub fn create_channel(ctx: Context<CreateChannel>) -> Result<()> {
+        let channel = &mut ctx.accounts.channel;
+        channel.subject = ctx.accounts.subject.key();
+        channel.posts = Vec::new();
+        channel.post_count = 0;
+        Ok(())
     }
 
     // Create a post in a channel
     pub fn create_post(ctx: Context<CreatePost>, content: String) -> Result<()> {
-      let post = &mut ctx.accounts.post;
-      let author = &ctx.accounts.author;
-      let clock: Clock = Clock::get().unwrap();
+        if content.len() > 128 {
+            return Err(error!(ErrorCode::ContentTooLong));
+        }
 
-      post.content = content;
-      post.timestamp = clock.unix_timestamp;
-      post.author = author.key();
-      post.channel = ctx.accounts.channel.key();
+        let channel = &mut ctx.accounts.channel;
+        if channel.post_count >= 50 {
+            return Err(error!(ErrorCode::MaximumPostsReached));
+        }
 
-      let channel = &mut ctx.accounts.channel;
-      channel.posts.push(post.key());
-      Ok(())
+        let post = &mut ctx.accounts.post;
+        post.content = content;
+        post.timestamp = Clock::get()?.unix_timestamp;
+        post.author = ctx.accounts.author.key();
+
+        channel.posts.push(post.key());
+        channel.post_count += 1;
+
+        Ok(())
     }
 }
 
 #[derive(Accounts)]
 pub struct CreateChannel<'info> {
-  #[account(mut)]
-  pub author: Signer<'info>,
+    #[account(mut)]
+    pub author: Signer<'info>,
 
-  #[account(init, payer = author, space = Channel::INIT_SPACE)]
-  pub channel: Account<'info, Channel>,
-  pub system_program: Program<'info, System>,
+    /// The subject account this channel is about
+    /// CHECK: This is just used as a reference key
+    pub subject: AccountInfo<'info>,
+
+    #[account(
+        init,
+        seeds = [b"channel", subject.key().as_ref()],
+        bump,
+        payer = author,
+        space = Channel::SPACE
+    )]
+    pub channel: Account<'info, Channel>,
+    
+    pub system_program: Program<'info, System>,
 }
 
 #[derive(Accounts)]
-pub struct CreatePost<'info> {            
-    #[account(init, 
-        seeds = [
-            &channel.posts.len().to_be_bytes(), 
-            channel.key().as_ref()
-        ], 
-        bump, 
-        payer = author, 
-        space=Post::INIT_SPACE
+pub struct CreatePost<'info> {
+    #[account(mut)]
+    pub author: Signer<'info>,
+
+    #[account(
+        mut,
+        seeds = [b"channel", channel.subject.as_ref()],
+        bump,
     )]
-    pub post: Account<'info, Post>,        
-    #[account(mut)]                                 
-    pub author: Signer<'info>,  
-    #[account(mut)]       
-    pub channel: Account<'info, Channel>,      
-    pub system_program: Program<'info, System>,    
+    pub channel: Account<'info, Channel>,
+
+    #[account(
+        init,
+        seeds = [
+            b"post",
+            channel.subject.as_ref(),
+            &channel.posts.len().to_le_bytes()
+        ],
+        bump,
+        payer = author,
+        space = Post::SPACE
+    )]
+    pub post: Account<'info, Post>,
+
+    pub system_program: Program<'info, System>,
 }
 
 #[account]
 pub struct Channel {
-  pub subject: Pubkey,
-  pub posts: Vec<Pubkey>
+    pub subject: Pubkey,      // The subject this channel is about
+    pub posts: Vec<Pubkey>,   // Vector of post PDAs
+    pub post_count: u8,       // Number of posts (max 50)
 }
 
 impl Channel {
-  pub const INIT_SPACE: usize = 8 + 32 + (4 + 25 * (4 + 64));
+    pub const SPACE: usize = 8 + // discriminator
+        32 +                     // subject pubkey
+        4 + (50 * 32) +         // vec of 50 post pubkeys
+        8;                       // post_count
 }
 
 #[account]
-#[derive(InitSpace)]
 pub struct Post {
-  pub channel: Pubkey,
-  #[max_len(128)]
-  pub content: String,
-  pub timestamp: i64,
-  pub author: Pubkey,
+    pub content: String,
+    pub timestamp: i64,
+    pub author: Pubkey,
+}
+
+impl Post {
+    pub const SPACE: usize = 8 +    // discriminator
+        (4 + 128) +                 // content string (4 bytes length + 128 bytes data)
+        8 +                         // timestamp
+        32;                         // author pubkey
+}
+
+#[error_code]
+pub enum ErrorCode {
+    #[msg("Content must be 128 characters or less")]
+    ContentTooLong,
+    #[msg("Channel has reached maximum of 50 posts")]
+    MaximumPostsReached,
 }
