@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-declare_id!("coUnmi3oBUtwtd9fjeAvSsJssXh5A5xyPbhpewyzRVF");
+declare_id!("7YYvcE2oVjBGvFEyt4q3Ye6knDw2wE4j7Xi2tji9oNSW");
 
 #[program]
 pub mod open_dialogue_dapp {
