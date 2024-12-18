@@ -14,9 +14,9 @@ export default function OpenDialogueDappFeature() {
   return publicKey ? (
     <div>
       <AppHero
-        title="OpenDialogueDapp"
+        title="Open Dialogue"
         subtitle={
-          'Create a new account by clicking the "Create" button. The state of a account is stored on-chain and can be manipulated by calling the program\'s methods (increment, decrement, set, and close).'
+          'Create a new Channel by clicking the "Create channel" button. Then you and others can add Posts to that Channel.'
         }
       >
         <p className="mb-6">

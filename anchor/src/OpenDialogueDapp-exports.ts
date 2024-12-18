@@ -1,8 +1,8 @@
 // Here we export some useful types and functions for interacting with the Anchor program.
 import { AnchorProvider, Program } from '@coral-xyz/anchor'
 import { Cluster, PublicKey } from '@solana/web3.js'
-import OpenDialogueDappIDL from '../target/idl/OpenDialogueDapp.json'
-import type { OpenDialogueDapp } from '../target/types/OpenDialogueDapp'
+import OpenDialogueDappIDL from '../target/idl/open_dialogue_dapp.json'
+import type { OpenDialogueDapp } from '../target/types/open_dialogue_dapp'
 
 // Re-export the generated IDL and type
 export { OpenDialogueDapp, OpenDialogueDappIDL }

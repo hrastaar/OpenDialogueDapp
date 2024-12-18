@@ -54,8 +54,8 @@ export function OpenDialogueDappList() {
         </div>
       ) : (
         <div className="text-center">
-          <h2 className={"text-2xl"}>No accounts</h2>
-          No accounts found. Create one above to get started.
+          <h2 className={"text-2xl"}>No Channels</h2>
+          No Channels found. Create one above to get started.
         </div>
       )}
     </div>
@@ -63,18 +63,19 @@ export function OpenDialogueDappList() {
 }
 
 function OpenDialogueDappCard({ account }: { account: PublicKey }) {
-  const { accountQuery, createPostMutation } =
-    useOpenDialogueDappProgramAccount({
-      account,
-    });
+  const {
+    accountQuery,
+    createChannelMutation,
+    createPostMutation,
+    closeChannelMutation,
+  } = useOpenDialogueDappProgramAccount({
+    account,
+  });
 
-  const count = useMemo(
-    () => accountQuery.data?.count ?? 0,
-    [accountQuery.data?.count]
+  const channels = useMemo(
+    () => accountQuery.data?.channels ?? [],
+    [accountQuery.data?.channels]
   );
-
-  const channel = {} as any; // TODO: fetch from program
-  const { subject, posts, post_count } = channel;
 
   return accountQuery.isLoading ? (
     <span className="loading loading-spinner loading-lg"></span>
@@ -87,11 +88,11 @@ function OpenDialogueDappCard({ account }: { account: PublicKey }) {
             className="card-title justify-center text-3xl cursor-pointer"
             onClick={() => accountQuery.refetch()}
           >
-            {subject} with {post_count} {post_count > 1 ? "posts" : "post"}
+            Testing
           </h2>
 
           {/* Add post button */}
-          <div className="card-actions justify-around">
+          {/* <div className="card-actions justify-around">
             <button
               className="btn btn-xs lg:btn-md btn-outline"
               onClick={() => {
@@ -108,10 +109,25 @@ function OpenDialogueDappCard({ account }: { account: PublicKey }) {
             >
               Create post
             </button>
+          </div> */}
+
+          {/* Channels */}
+          <div>
+            {channels.map((channel: any, index: number) => {
+              return (
+                <div key={index}>
+                  <h3>
+                    {channel.subject} with {channel.post_count}{" "}
+                    {channel.post_count > 1 ? "posts" : "post"}
+                  </h3>
+                  <p>{channel.post_count}</p>
+                </div>
+              );
+            })}
           </div>
 
           {/* Posts */}
-          <div>
+          {/* <div>
             {posts.map((post: any, index: number) => {
               return (
                 <div key={index}>
@@ -125,7 +141,7 @@ function OpenDialogueDappCard({ account }: { account: PublicKey }) {
                 </div>
               );
             })}
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

@@ -1,0 +1,323 @@
+{
+  "address": "9fPsvWHnM6BUsYhYMgsTKZe7nbpcjmuMygA9cMCEJmtc",
+  "metadata": {
+    "name": "open_dialogue_dapp",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Created with Anchor"
+  },
+  "instructions": [
+    {
+      "name": "close_channel",
+      "discriminator": [
+        0,
+        104,
+        36,
+        1,
+        66,
+        0,
+        103,
+        157
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "channel",
+          "writable": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "create_channel",
+      "discriminator": [
+        37,
+        105,
+        253,
+        99,
+        87,
+        46,
+        223,
+        20
+      ],
+      "accounts": [
+        {
+          "name": "state",
+          "writable": true
+        },
+        {
+          "name": "author",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "subject",
+          "docs": [
+            "The subject account this channel is about"
+          ]
+        },
+        {
+          "name": "channel",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  104,
+                  97,
+                  110,
+                  110,
+                  101,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "subject"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "create_post",
+      "discriminator": [
+        123,
+        92,
+        184,
+        29,
+        231,
+        24,
+        15,
+        202
+      ],
+      "accounts": [
+        {
+          "name": "author",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "channel",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  104,
+                  97,
+                  110,
+                  110,
+                  101,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "channel.subject",
+                "account": "Channel"
+              }
+            ]
+          }
+        },
+        {
+          "name": "post",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  115,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "channel.subject",
+                "account": "Channel"
+              },
+              {
+                "kind": "account",
+                "path": "channel.posts",
+                "account": "Channel"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "content",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "initialize",
+      "discriminator": [
+        175,
+        175,
+        109,
+        31,
+        13,
+        152,
+        155,
+        237
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "state",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Channel",
+      "discriminator": [
+        49,
+        159,
+        99,
+        106,
+        220,
+        87,
+        219,
+        88
+      ]
+    },
+    {
+      "name": "Post",
+      "discriminator": [
+        8,
+        147,
+        90,
+        186,
+        185,
+        56,
+        192,
+        150
+      ]
+    },
+    {
+      "name": "State",
+      "discriminator": [
+        216,
+        146,
+        107,
+        94,
+        104,
+        75,
+        182,
+        177
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "NoChannelAvailable",
+      "msg": "NoChannelAvailable"
+    },
+    {
+      "code": 6001,
+      "name": "ContentTooLong",
+      "msg": "Content must be 128 characters or less"
+    },
+    {
+      "code": 6002,
+      "name": "MaximumPostsReached",
+      "msg": "Channel has reached maximum of 50 posts"
+    }
+  ],
+  "types": [
+    {
+      "name": "Channel",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "subject",
+            "type": "pubkey"
+          },
+          {
+            "name": "posts",
+            "type": {
+              "vec": "pubkey"
+            }
+          },
+          {
+            "name": "post_count",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Post",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "content",
+            "type": "string"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          },
+          {
+            "name": "author",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "State",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "channels",
+            "type": {
+              "vec": "pubkey"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -29,7 +29,7 @@ export function useOpenDialogueDappProgram() {
 
   const accounts = useQuery({
     queryKey: ["OpenDialogueDapp", "all", { cluster }],
-    queryFn: () => program.account.OpenDialogueDapp.all(),
+    queryFn: () => program.account.state.all(),
   });
 
   const getProgramAccount = useQuery({
@@ -37,35 +37,19 @@ export function useOpenDialogueDappProgram() {
     queryFn: () => connection.getParsedAccountInfo(programId),
   });
 
-  // const initialize = useMutation({
-  //   mutationKey: ["OpenDialogueDapp", "initialize", { cluster }],
-  //   mutationFn: (keypair: Keypair) =>
-  //     program.methods
-  //       .initialize()
-  //       .accounts({ OpenDialogueDapp: keypair.publicKey })
-  //       .signers([keypair])
-  //       .rpc(),
-  //   onSuccess: (signature) => {
-  //     transactionToast(signature);
-  //     return accounts.refetch();
-  //   },
-  //   onError: () => toast.error("Failed to initialize account"),
-  // });
-
-  // TODO: Should create_channel be a standalone function here, or defined below in useOpenDialogueDappProgramAccount?
-  const create_channel = useMutation({
-    mutationKey: ["OpenDialogueDapp", "create_channel", { cluster }],
+  const initialize = useMutation({
+    mutationKey: ["OpenDialogueDapp", "initialize", { cluster }],
     mutationFn: (keypair: Keypair) =>
       program.methods
-        .create_channel()
-        .accounts({ OpenDialogueDapp: keypair.publicKey, subject: "" }) // TODO: how do we get the subject pubkey?
+        .initialize()
+        .accounts({ payer: keypair.publicKey })
         .signers([keypair])
         .rpc(),
     onSuccess: (signature) => {
       transactionToast(signature);
       return accounts.refetch();
     },
-    onError: () => toast.error("Failed to create channel"),
+    onError: () => toast.error("Failed to initialize account"),
   });
 
   return {
@@ -73,7 +57,7 @@ export function useOpenDialogueDappProgram() {
     programId,
     accounts,
     getProgramAccount,
-    initialize: create_channel,
+    initialize,
   };
 }
 
@@ -88,16 +72,15 @@ export function useOpenDialogueDappProgramAccount({
 
   const accountQuery = useQuery({
     queryKey: ["OpenDialogueDapp", "fetch", { cluster, account }],
-    queryFn: () => program.account.OpenDialogueDapp.fetch(account),
+    queryFn: () => program.account.state.fetch(account),
   });
 
-  // Creates a new channel by invoking the program <create_channel> instruction
   const createChannelMutation = useMutation({
     mutationKey: ["OpenDialogueDapp", "create_channel", { cluster, account }],
     mutationFn: () =>
       program.methods
-        .create_channel()
-        .accounts({ OpenDialogueDapp: account })
+        .createChannel()
+        .accounts({ state: account, author: "", subject: "" })
         .rpc(),
     onSuccess: (tx) => {
       transactionToast(tx);
@@ -105,14 +88,20 @@ export function useOpenDialogueDappProgramAccount({
     },
   });
 
-  // Creates a new post for a channel by invoking the program <create_post> instruction
+  const closeChannelMutation = useMutation({
+    mutationKey: ["OpenDialogueDapp", "close_channel", { cluster, account }],
+    mutationFn: () =>
+      program.methods.closeChannel().accounts({ payer: "", channel: "" }).rpc(),
+    onSuccess: (tx) => {
+      transactionToast(tx);
+      return accountQuery.refetch();
+    },
+  });
+
   const createPostMutation = useMutation({
     mutationKey: ["OpenDialogueDapp", "create_post", { cluster, account }],
     mutationFn: (content: string) =>
-      program.methods
-        .create_post(content)
-        .accounts({ OpenDialogueDapp: account })
-        .rpc(),
+      program.methods.createPost(content).accounts({ author: "" }).rpc(),
     onSuccess: (tx) => {
       transactionToast(tx);
       return accountQuery.refetch();
@@ -122,6 +111,7 @@ export function useOpenDialogueDappProgramAccount({
   return {
     accountQuery,
     createChannelMutation,
+    closeChannelMutation,
     createPostMutation,
   };
 }
