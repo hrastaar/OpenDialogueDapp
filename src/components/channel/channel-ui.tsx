@@ -122,6 +122,7 @@ function ChannelCard({ account }: { account: PublicKey }) {
     <div className="card card-bordered border-base-300 border-4 text-neutral-content">
       <div className="card-body items-center text-center">
         <div className="space-y-6">
+          {/* Channel info */}
           <h2
             className="card-title justify-center text-3xl cursor-pointer"
             onClick={() => accountQuery.refetch()}
@@ -129,6 +130,11 @@ function ChannelCard({ account }: { account: PublicKey }) {
             {subject.toString()}
           </h2>
           <p>by {author.toString()}</p>
+          <p>
+            with {postCount} {postCount > 1 ? "posts" : "post"}
+          </p>
+
+          {/* Create post */}
           <div className="card-actions justify-around">
             <button
               className="btn btn-xs lg:btn-md btn-outline"
@@ -144,6 +150,30 @@ function ChannelCard({ account }: { account: PublicKey }) {
               Post
             </button>
           </div>
+
+          {/* Posts */}
+          {postCount === 0 && (
+            <div className="text-center">
+              No posts found. Create one above to get started.
+            </div>
+          )}
+          {postCount > 0 && (
+            <div>
+              {posts.map((post: any, index) => {
+                return (
+                  <div key={index}>
+                    <p>{post.author.toString()}</p>
+                    <p>{post.content}</p>
+                    <p>
+                      Created at {new Date(post.timestamp).toLocaleTimeString()}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Close channel */}
           <div className="text-center space-y-4">
             <p>
               <ExplorerLink
