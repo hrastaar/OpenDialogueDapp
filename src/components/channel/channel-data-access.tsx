@@ -90,59 +90,28 @@ export function useChannelProgramAccount({ account }: { account: PublicKey }) {
   });
 
   const closeMutation = useMutation({
-    mutationKey: ["channel", "close", { cluster, account }],
+    mutationKey: ["channel", "close_channel", { cluster, account }],
     mutationFn: () =>
-      program.methods.close().accounts({ channel: account }).rpc(),
+      program.methods.closeChannel().accounts({ channel: account }).rpc(),
     onSuccess: (tx) => {
       transactionToast(tx);
       return accounts.refetch();
     },
   });
 
-  // const createPostMutation = useMutation({
-  //   mutationKey: ["channel", "set", { cluster, account }],
-  //   mutationFn: (value: number) =>
-  //     program.methods.create(value).accounts({ channel: account }).rpc(),
-  //   onSuccess: (tx) => {
-  //     transactionToast(tx);
-  //     return accountQuery.refetch();
-  //   },
-  // });
-
-  // ----
-
-  // const decrementMutation = useMutation({
-  //   mutationKey: ["channel", "decrement", { cluster, account }],
-  //   mutationFn: () =>
-  //     program.methods.decrement().accounts({ channel: account }).rpc(),
-  //   onSuccess: (tx) => {
-  //     transactionToast(tx);
-  //     return accountQuery.refetch();
-  //   },
-  // });
-
-  // const incrementMutation = useMutation({
-  //   mutationKey: ["channel", "increment", { cluster, account }],
-  //   mutationFn: () =>
-  //     program.methods.increment().accounts({ channel: account }).rpc(),
-  //   onSuccess: (tx) => {
-  //     transactionToast(tx);
-  //     return accountQuery.refetch();
-  //   },
-  // });
-
-  // const setMutation = useMutation({
-  //   mutationKey: ["channel", "set", { cluster, account }],
-  //   mutationFn: (value: number) =>
-  //     program.methods.set(value).accounts({ channel: account }).rpc(),
-  //   onSuccess: (tx) => {
-  //     transactionToast(tx);
-  //     return accountQuery.refetch();
-  //   },
-  // });
+  const createPostMutation = useMutation({
+    mutationKey: ["channel", "create_post", { cluster, account }],
+    mutationFn: (content: string) =>
+      program.methods.createPost(content).accounts({ author: account }).rpc(),
+    onSuccess: (tx) => {
+      transactionToast(tx);
+      return accountQuery.refetch();
+    },
+  });
 
   return {
     accountQuery,
+    createPostMutation,
     closeMutation,
   };
 }

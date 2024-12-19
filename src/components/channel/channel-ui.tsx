@@ -94,9 +94,10 @@ export function ChannelList() {
 }
 
 function ChannelCard({ account }: { account: PublicKey }) {
-  const { accountQuery, closeMutation } = useChannelProgramAccount({
-    account,
-  });
+  const { accountQuery, createPostMutation, closeMutation } =
+    useChannelProgramAccount({
+      account,
+    });
 
   const author = useMemo(
     () => accountQuery.data?.author ?? "",
@@ -127,42 +128,22 @@ function ChannelCard({ account }: { account: PublicKey }) {
           >
             {subject.toString()}
           </h2>
-          {/* <div className="card-actions justify-around">
-            <button
-              className="btn btn-xs lg:btn-md btn-outline"
-              onClick={() => incrementMutation.mutateAsync()}
-              disabled={incrementMutation.isPending}
-            >
-              Increment
-            </button>
+          <p>by {author.toString()}</p>
+          <div className="card-actions justify-around">
             <button
               className="btn btn-xs lg:btn-md btn-outline"
               onClick={() => {
-                const value = window.prompt(
-                  "Set value to:",
-                  count.toString() ?? "0"
-                );
-                if (
-                  !value ||
-                  parseInt(value) === count ||
-                  isNaN(parseInt(value))
-                ) {
+                const content = window.prompt("Set post content to:");
+                if (!content || content === "") {
                   return;
                 }
-                return setMutation.mutateAsync(parseInt(value));
+                return createPostMutation.mutateAsync(content);
               }}
-              disabled={setMutation.isPending}
+              disabled={createPostMutation.isPending}
             >
-              Set
+              Post
             </button>
-            <button
-              className="btn btn-xs lg:btn-md btn-outline"
-              onClick={() => decrementMutation.mutateAsync()}
-              disabled={decrementMutation.isPending}
-            >
-              Decrement
-            </button>
-          </div> */}
+          </div>
           <div className="text-center space-y-4">
             <p>
               <ExplorerLink
