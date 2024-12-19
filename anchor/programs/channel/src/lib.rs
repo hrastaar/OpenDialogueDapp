@@ -3,23 +3,15 @@ use anchor_lang::prelude::*;
 declare_id!("9fPsvWHnM6BUsYhYMgsTKZe7nbpcjmuMygA9cMCEJmtc");
 
 #[program]
-pub mod open_dialogue_dapp {
+pub mod channel {
     use super::*;
 
-    pub fn initialize(_ctx: Context<Initialize>) -> Result<()> {
-        Ok(())
-    }
-
     // Create a channel for a subject (can only be one channel per subject)
-    pub fn create_channel(ctx: Context<CreateChannel>) -> Result<()> {
+    pub fn initialize(ctx: Context<InitializeChannel>) -> Result<()> {
         let channel = &mut ctx.accounts.channel;
         channel.subject = ctx.accounts.subject.key();
         channel.posts = Vec::new();
         channel.post_count = 0;
-
-        let state = &mut ctx.accounts.state;
-
-        state.channels.push(channel.key());
 
         Ok(())
     }
@@ -52,21 +44,7 @@ pub mod open_dialogue_dapp {
 }
 
 #[derive(Accounts)]
-pub struct Initialize<'info> {
-    #[account(mut)]
-    pub payer: Signer<'info>,
-
-    #[account(init, space = State::SPACE, payer = payer)]
-    pub state: Account<'info, State>,
-
-    pub system_program: Program<'info, System>,
-}
-
-#[derive(Accounts)]
-pub struct CreateChannel<'info> {
-    #[account(mut)]
-    pub state: Account<'info, State>,
-
+pub struct InitializeChannel<'info> {
     #[account(mut)]
     pub author: Signer<'info>,
 
@@ -78,12 +56,21 @@ pub struct CreateChannel<'info> {
         init,
         seeds = [b"channel", subject.key().as_ref()],
         bump,
-        payer = author,
-        space = Channel::SPACE
+        space = Channel::SPACE,
+        payer = author
     )]
     pub channel: Account<'info, Channel>,
 
     pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
+pub struct CloseChannel<'info> {
+    #[account(mut)]
+    pub payer: Signer<'info>,
+
+    #[account(mut, close = payer)]
+    pub channel: Account<'info, Channel>,
 }
 
 #[derive(Accounts)]
@@ -110,31 +97,9 @@ pub struct CreatePost<'info> {
     pub system_program: Program<'info, System>,
 }
 
-#[derive(Accounts)]
-pub struct CloseChannel<'info> {
-    #[account(mut)]
-    pub payer: Signer<'info>,
-
-    #[account(
-  mut,
-  close = payer, // close account and return lamports to payer
-  )]
-    pub channel: Account<'info, Channel>,
-}
-
-#[account]
-pub struct State {
-    pub channels: Vec<Pubkey>,
-}
-
-impl State {
-    pub const SPACE: usize =
-        8 + // discriminator
-        10 * 32; // vec of 10 channel pubkeys
-}
-
 #[account]
 pub struct Channel {
+    pub author: Pubkey,
     pub subject: Pubkey, // The subject this channel is about
     pub posts: Vec<Pubkey>, // Vector of post PDAs
     pub post_count: u8, // Number of posts (max 50)
@@ -143,8 +108,8 @@ pub struct Channel {
 impl Channel {
     pub const SPACE: usize =
         8 + // discriminator
+        32 + // author pubkey
         32 + // subject pubkey
-        4 +
         50 * 32 + // vec of 50 post pubkeys
         8; // post_count
 }
@@ -166,8 +131,6 @@ impl Post {
 
 #[error_code]
 pub enum ErrorCode {
-    #[msg("NoChannelAvailable")]
-    NoChannelAvailable,
     #[msg("Content must be 128 characters or less")]
     ContentTooLong,
     #[msg("Channel has reached maximum of 50 posts")]

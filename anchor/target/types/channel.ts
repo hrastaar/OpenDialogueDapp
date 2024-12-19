@@ -1,14 +1,20 @@
-{
+/**
+ * Program IDL in camelCase format in order to be used in JS/TS.
+ *
+ * Note that this is only a type helper and is not the actual IDL. The original
+ * IDL can be found at `target/idl/channel.json`.
+ */
+export type Channel = {
   "address": "9fPsvWHnM6BUsYhYMgsTKZe7nbpcjmuMygA9cMCEJmtc",
   "metadata": {
-    "name": "open_dialogue_dapp",
+    "name": "channel",
     "version": "0.1.0",
     "spec": "0.1.0",
     "description": "Created with Anchor"
   },
   "instructions": [
     {
-      "name": "close_channel",
+      "name": "closeChannel",
       "discriminator": [
         0,
         104,
@@ -33,66 +39,7 @@
       "args": []
     },
     {
-      "name": "create_channel",
-      "discriminator": [
-        37,
-        105,
-        253,
-        99,
-        87,
-        46,
-        223,
-        20
-      ],
-      "accounts": [
-        {
-          "name": "state",
-          "writable": true
-        },
-        {
-          "name": "author",
-          "writable": true,
-          "signer": true
-        },
-        {
-          "name": "subject",
-          "docs": [
-            "The subject account this channel is about"
-          ]
-        },
-        {
-          "name": "channel",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  99,
-                  104,
-                  97,
-                  110,
-                  110,
-                  101,
-                  108
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "subject"
-              }
-            ]
-          }
-        },
-        {
-          "name": "system_program",
-          "address": "11111111111111111111111111111111"
-        }
-      ],
-      "args": []
-    },
-    {
-      "name": "create_post",
+      "name": "createPost",
       "discriminator": [
         123,
         92,
@@ -129,7 +76,7 @@
               {
                 "kind": "account",
                 "path": "channel.subject",
-                "account": "Channel"
+                "account": "channel"
               }
             ]
           }
@@ -151,18 +98,18 @@
               {
                 "kind": "account",
                 "path": "channel.subject",
-                "account": "Channel"
+                "account": "channel"
               },
               {
                 "kind": "account",
                 "path": "channel.posts",
-                "account": "Channel"
+                "account": "channel"
               }
             ]
           }
         },
         {
-          "name": "system_program",
+          "name": "systemProgram",
           "address": "11111111111111111111111111111111"
         }
       ],
@@ -187,17 +134,42 @@
       ],
       "accounts": [
         {
-          "name": "payer",
+          "name": "author",
           "writable": true,
           "signer": true
         },
         {
-          "name": "state",
-          "writable": true,
-          "signer": true
+          "name": "subject",
+          "docs": [
+            "The subject account this channel is about"
+          ]
         },
         {
-          "name": "system_program",
+          "name": "channel",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  104,
+                  97,
+                  110,
+                  110,
+                  101,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "subject"
+              }
+            ]
+          }
+        },
+        {
+          "name": "systemProgram",
           "address": "11111111111111111111111111111111"
         }
       ],
@@ -206,7 +178,7 @@
   ],
   "accounts": [
     {
-      "name": "Channel",
+      "name": "channel",
       "discriminator": [
         49,
         159,
@@ -219,7 +191,7 @@
       ]
     },
     {
-      "name": "Post",
+      "name": "post",
       "discriminator": [
         8,
         147,
@@ -230,44 +202,30 @@
         192,
         150
       ]
-    },
-    {
-      "name": "State",
-      "discriminator": [
-        216,
-        146,
-        107,
-        94,
-        104,
-        75,
-        182,
-        177
-      ]
     }
   ],
   "errors": [
     {
       "code": 6000,
-      "name": "NoChannelAvailable",
-      "msg": "NoChannelAvailable"
-    },
-    {
-      "code": 6001,
-      "name": "ContentTooLong",
+      "name": "contentTooLong",
       "msg": "Content must be 128 characters or less"
     },
     {
-      "code": 6002,
-      "name": "MaximumPostsReached",
+      "code": 6001,
+      "name": "maximumPostsReached",
       "msg": "Channel has reached maximum of 50 posts"
     }
   ],
   "types": [
     {
-      "name": "Channel",
+      "name": "channel",
       "type": {
         "kind": "struct",
         "fields": [
+          {
+            "name": "author",
+            "type": "pubkey"
+          },
           {
             "name": "subject",
             "type": "pubkey"
@@ -279,14 +237,14 @@
             }
           },
           {
-            "name": "post_count",
+            "name": "postCount",
             "type": "u8"
           }
         ]
       }
     },
     {
-      "name": "Post",
+      "name": "post",
       "type": {
         "kind": "struct",
         "fields": [
@@ -304,20 +262,6 @@
           }
         ]
       }
-    },
-    {
-      "name": "State",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "channels",
-            "type": {
-              "vec": "pubkey"
-            }
-          }
-        ]
-      }
     }
   ]
-}
+};

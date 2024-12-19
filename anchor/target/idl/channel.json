@@ -1,20 +1,14 @@
-/**
- * Program IDL in camelCase format in order to be used in JS/TS.
- *
- * Note that this is only a type helper and is not the actual IDL. The original
- * IDL can be found at `target/idl/open_dialogue_dapp.json`.
- */
-export type OpenDialogueDapp = {
+{
   "address": "9fPsvWHnM6BUsYhYMgsTKZe7nbpcjmuMygA9cMCEJmtc",
   "metadata": {
-    "name": "openDialogueDapp",
+    "name": "channel",
     "version": "0.1.0",
     "spec": "0.1.0",
     "description": "Created with Anchor"
   },
   "instructions": [
     {
-      "name": "closeChannel",
+      "name": "close_channel",
       "discriminator": [
         0,
         104,
@@ -39,66 +33,7 @@ export type OpenDialogueDapp = {
       "args": []
     },
     {
-      "name": "createChannel",
-      "discriminator": [
-        37,
-        105,
-        253,
-        99,
-        87,
-        46,
-        223,
-        20
-      ],
-      "accounts": [
-        {
-          "name": "state",
-          "writable": true
-        },
-        {
-          "name": "author",
-          "writable": true,
-          "signer": true
-        },
-        {
-          "name": "subject",
-          "docs": [
-            "The subject account this channel is about"
-          ]
-        },
-        {
-          "name": "channel",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  99,
-                  104,
-                  97,
-                  110,
-                  110,
-                  101,
-                  108
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "subject"
-              }
-            ]
-          }
-        },
-        {
-          "name": "systemProgram",
-          "address": "11111111111111111111111111111111"
-        }
-      ],
-      "args": []
-    },
-    {
-      "name": "createPost",
+      "name": "create_post",
       "discriminator": [
         123,
         92,
@@ -135,7 +70,7 @@ export type OpenDialogueDapp = {
               {
                 "kind": "account",
                 "path": "channel.subject",
-                "account": "channel"
+                "account": "Channel"
               }
             ]
           }
@@ -157,18 +92,18 @@ export type OpenDialogueDapp = {
               {
                 "kind": "account",
                 "path": "channel.subject",
-                "account": "channel"
+                "account": "Channel"
               },
               {
                 "kind": "account",
                 "path": "channel.posts",
-                "account": "channel"
+                "account": "Channel"
               }
             ]
           }
         },
         {
-          "name": "systemProgram",
+          "name": "system_program",
           "address": "11111111111111111111111111111111"
         }
       ],
@@ -193,17 +128,42 @@ export type OpenDialogueDapp = {
       ],
       "accounts": [
         {
-          "name": "payer",
+          "name": "author",
           "writable": true,
           "signer": true
         },
         {
-          "name": "state",
-          "writable": true,
-          "signer": true
+          "name": "subject",
+          "docs": [
+            "The subject account this channel is about"
+          ]
         },
         {
-          "name": "systemProgram",
+          "name": "channel",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  104,
+                  97,
+                  110,
+                  110,
+                  101,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "subject"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
           "address": "11111111111111111111111111111111"
         }
       ],
@@ -212,7 +172,7 @@ export type OpenDialogueDapp = {
   ],
   "accounts": [
     {
-      "name": "channel",
+      "name": "Channel",
       "discriminator": [
         49,
         159,
@@ -225,7 +185,7 @@ export type OpenDialogueDapp = {
       ]
     },
     {
-      "name": "post",
+      "name": "Post",
       "discriminator": [
         8,
         147,
@@ -236,44 +196,30 @@ export type OpenDialogueDapp = {
         192,
         150
       ]
-    },
-    {
-      "name": "state",
-      "discriminator": [
-        216,
-        146,
-        107,
-        94,
-        104,
-        75,
-        182,
-        177
-      ]
     }
   ],
   "errors": [
     {
       "code": 6000,
-      "name": "noChannelAvailable",
-      "msg": "noChannelAvailable"
-    },
-    {
-      "code": 6001,
-      "name": "contentTooLong",
+      "name": "ContentTooLong",
       "msg": "Content must be 128 characters or less"
     },
     {
-      "code": 6002,
-      "name": "maximumPostsReached",
+      "code": 6001,
+      "name": "MaximumPostsReached",
       "msg": "Channel has reached maximum of 50 posts"
     }
   ],
   "types": [
     {
-      "name": "channel",
+      "name": "Channel",
       "type": {
         "kind": "struct",
         "fields": [
+          {
+            "name": "author",
+            "type": "pubkey"
+          },
           {
             "name": "subject",
             "type": "pubkey"
@@ -285,14 +231,14 @@ export type OpenDialogueDapp = {
             }
           },
           {
-            "name": "postCount",
+            "name": "post_count",
             "type": "u8"
           }
         ]
       }
     },
     {
-      "name": "post",
+      "name": "Post",
       "type": {
         "kind": "struct",
         "fields": [
@@ -310,20 +256,6 @@ export type OpenDialogueDapp = {
           }
         ]
       }
-    },
-    {
-      "name": "state",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "channels",
-            "type": {
-              "vec": "pubkey"
-            }
-          }
-        ]
-      }
     }
   ]
-};
+}

@@ -6,7 +6,7 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-open_dialogue_dapp = "9fPsvWHnM6BUsYhYMgsTKZe7nbpcjmuMygA9cMCEJmtc"
+channel = "9fPsvWHnM6BUsYhYMgsTKZe7nbpcjmuMygA9cMCEJmtc"
 
 [registry]
 url = "https://api.apr.dev"
